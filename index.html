@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Answer Evaluation System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .correct-answer {
+            background-color: #22c55e !important;
+            color: white;
+        }
+        .incorrect-answer {
+            background-color: #ef4444 !important;
+            color: white;
+        }
+        .neutral-answer {
+            background-color: #f3f4f6;
+        }
+        .answer-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+        }
+        .loading {
+            display: none;
+        }
+        .loading.show {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="container mx-auto px-4 max-w-7xl">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-center text-blue-600 mb-8">Student Answer Evaluation System</h1>
+            
+            <!-- Step 1: Upload File -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Step 1: Upload Student Answers File</h2>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <input type="file" id="fileInput" accept=".xlsx,.xls" class="hidden">
+                    <label for="fileInput" class="cursor-pointer">
+                        <div class="text-gray-500">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <p class="mt-2 text-sm">Click to upload Excel file (.xlsx)</p>
+                        </div>
+                    </label>
+                </div>
+                <div id="fileInfo" class="mt-4 text-sm text-gray-600 hidden"></div>
+            </div>
+
+            <!-- Step 2: Enter Correct Answers -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Step 2: Enter Correct Answers (A, B, C, D)</h2>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="answer-grid mb-4">
+                        <div class="font-semibold text-center text-sm text-gray-600">Q1</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q2</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q3</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q4</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q5</div>
+                        
+                        <input type="text" id="correct1" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct2" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct3" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct4" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct5" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                    </div>
+                    
+                    <div class="answer-grid mb-4">
+                        <div class="font-semibold text-center text-sm text-gray-600">Q6</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q7</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q8</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q9</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q10</div>
+                        
+                        <input type="text" id="correct6" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct7" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct8" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct9" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct10" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                    </div>
+                    
+                    <div class="answer-grid mb-4">
+                        <div class="font-semibold text-center text-sm text-gray-600">Q11</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q12</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q13</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q14</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q15</div>
+                        
+                        <input type="text" id="correct11" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct12" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct13" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct14" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct15" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                    </div>
+                    
+                    <div class="answer-grid mb-4">
+                        <div class="font-semibold text-center text-sm text-gray-600">Q16</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q17</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q18</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q19</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q20</div>
+                        
+                        <input type="text" id="correct16" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct17" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct18" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct19" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct20" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                    </div>
+                    
+                    <div class="answer-grid mb-4">
+                        <div class="font-semibold text-center text-sm text-gray-600">Q21</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q22</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q23</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q24</div>
+                        <div class="font-semibold text-center text-sm text-gray-600">Q25</div>
+                        
+                        <input type="text" id="correct21" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct22" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct23" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct24" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                        <input type="text" id="correct25" class="w-full p-2 border rounded text-center uppercase" maxlength="1" placeholder="A">
+                    </div>
+                    
+                    <div class="flex gap-4 mt-4">
+                        <button onclick="fillAllAnswers('A')" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Fill All A</button>
+                        <button onclick="fillAllAnswers('B')" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Fill All B</button>
+                        <button onclick="fillAllAnswers('C')" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Fill All C</button>
+                        <button onclick="fillAllAnswers('D')" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Fill All D</button>
+                        <button onclick="clearAllAnswers()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Clear All</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Evaluate Button -->
+            <div class="mb-8 text-center">
+                <button id="evaluateBtn" onclick="evaluateAnswers()" class="px-8 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    Evaluate Answers
+                </button>
+                <div id="loadingMsg" class="loading mt-4 text-blue-600">
+                    <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="mt-2">Evaluating answers...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">Evaluation Results</h2>
+            
+            <!-- Summary Statistics -->
+            <div id="summaryStats" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <!-- Stats will be populated here -->
+            </div>
+
+            <!-- Export Options -->
+            <div class="mb-6 flex gap-4">
+                <button onclick="exportToCSV()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Export to CSV
+                </button>
+                <button onclick="exportToExcel()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                    Export to Excel
+                </button>
+                <button onclick="printResults()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                    Print Results
+                </button>
+            </div>
+
+            <!-- Detailed Results Table -->
+            <div class="overflow-x-auto">
+                <table id="resultsTable" class="min-w-full bg-white border border-gray-300">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 border text-left">Student Name</th>
+                            <th class="px-4 py-2 border text-left">Timestamp</th>
+                            <th class="px-4 py-2 border text-center">Score</th>
+                            <th class="px-4 py-2 border text-center">Percentage</th>
+                            <th class="px-4 py-2 border text-center">Grade</th>
+                            <th class="px-4 py-2 border text-center">Q1</th>
+                            <th class="px-4 py-2 border text-center">Q2</th>
+                            <th class="px-4 py-2 border text-center">Q3</th>
+                            <th class="px-4 py-2 border text-center">Q4</th>
+                            <th class="px-4 py-2 border text-center">Q5</th>
+                            <th class="px-4 py-2 border text-center">Q6</th>
+                            <th class="px-4 py-2 border text-center">Q7</th>
+                            <th class="px-4 py-2 border text-center">Q8</th>
+                            <th class="px-4 py-2 border text-center">Q9</th>
+                            <th class="px-4 py-2 border text-center">Q10</th>
+                            <th class="px-4 py-2 border text-center">Q11</th>
+                            <th class="px-4 py-2 border text-center">Q12</th>
+                            <th class="px-4 py-2 border text-center">Q13</th>
+                            <th class="px-4 py-2 border text-center">Q14</th>
+                            <th class="px-4 py-2 border text-center">Q15</th>
+                            <th class="px-4 py-2 border text-center">Q16</th>
+                            <th class="px-4 py-2 border text-center">Q17</th>
+                            <th class="px-4 py-2 border text-center">Q18</th>
+                            <th class="px-4 py-2 border text-center">Q19</th>
+                            <th class="px-4 py-2 border text-center">Q20</th>
+                            <th class="px-4 py-2 border text-center">Q21</th>
+                            <th class="px-4 py-2 border text-center">Q22</th>
+                            <th class="px-4 py-2 border text-center">Q23</th>
+                            <th class="px-4 py-2 border text-center">Q24</th>
+                            <th class="px-4 py-2 border text-center">Q25</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody">
+                        <!-- Results will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the external JavaScript file -->
+    <script src="evaluation.js"></script>
+</body>
+</html>
