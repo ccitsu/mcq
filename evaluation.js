@@ -2,6 +2,29 @@
 var studentData = [];
 var correctAnswers = [];
 
+// Function to convert Excel serial date to readable date string
+function excelDateToJSDate(excelDate) {
+    // Check if it's already a string (not a number)
+    if (typeof excelDate === 'string') {
+        return excelDate; // Return as-is if it's already formatted
+    }
+    
+    // Check if it's a valid number
+    if (typeof excelDate !== 'number' || isNaN(excelDate)) {
+        return excelDate; // Return as-is if not a number
+    }
+    
+    // Excel stores dates as days since January 1, 1900
+    // JavaScript dates use milliseconds since January 1, 1970
+    // Excel incorrectly treats 1900 as a leap year, so we need to adjust
+    var excelEpoch = new Date(1899, 11, 30); // December 30, 1899
+    var excelDateInMilliseconds = excelDate * 24 * 60 * 60 * 1000;
+    var jsDate = new Date(excelEpoch.getTime() + excelDateInMilliseconds);
+    
+    // Format the date nicely
+    return jsDate.toLocaleString();
+}
+
 // File input handling
 document.getElementById('fileInput').addEventListener('change', function(e) {
     var file = e.target.files[0];
@@ -12,11 +35,27 @@ document.getElementById('fileInput').addEventListener('change', function(e) {
         var reader = new FileReader();
         reader.onload = function(e) {
             var data = new Uint8Array(e.target.result);
-            var workbook = XLSX.read(data, {type: 'array'});
+            var workbook = XLSX.read(data, {type: 'array', cellDates: true});
             var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            var jsonData = XLSX.utils.sheet_to_json(firstSheet);
+            var jsonData = XLSX.utils.sheet_to_json(firstSheet, {raw: false, dateNF: 'mm/dd/yyyy hh:mm:ss'});
             
-            studentData = jsonData;
+            // Process the data to ensure proper timestamp formatting
+            studentData = jsonData.map(function(student) {
+                // Create a copy of the student object
+                var processedStudent = {};
+                for (var key in student) {
+                    if (student.hasOwnProperty(key)) {
+                        if (key.toLowerCase() === 'timestamp') {
+                            // Special handling for timestamp
+                            processedStudent[key] = excelDateToJSDate(student[key]);
+                        } else {
+                            processedStudent[key] = student[key];
+                        }
+                    }
+                }
+                return processedStudent;
+            });
+            
             console.log('Loaded student data:', studentData);
             
             document.getElementById('fileInfo').textContent = 
